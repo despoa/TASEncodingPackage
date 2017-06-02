@@ -161,9 +161,10 @@ echo.
 :: Video ::
 "./programs/replacetext" "encode.avs" "pass = 2" "pass = 0"
 "./programs/replacetext" "encode.avs" "i444 = true" "i444 = false"
-"./programs/x264_x86" --threads auto --crf 20 --keyint 600 --preset veryslow --range tv --input-range tv --colormatrix smpte170m -o "./temp/video_512kb_extra.mp4" encode.avs
+"./programs/x264_x86" --threads auto --crf 20 --keyint 600 --preset veryslow --range tv --input-range tv --colormatrix smpte170m -o "./temp/video_512kb_extra.h264" encode.avs
 :: Muxing ::
-"./programs/MP4Box" -hint -add "./temp/video_512kb_extra.mp4" -add "./temp/audio_extra.mp4" -new "./output/encode_512kb_extra.mp4"
+for /f "tokens=2" %%i in ('%~dp0\programs\avs2pipemod -info encode.avs ^|find "fps"') do (set fps=%%i)
+"./programs/MP4Box" -hint -add "./temp/video_512kb_extra.h264":fps=%fps% -add "./temp/audio_extra.mp4" -new "./output/encode_512kb_extra.mp4"
 
 : Defaults
 "./programs/replacetext" "encode.avs" "pass = 1" "pass = 0"
