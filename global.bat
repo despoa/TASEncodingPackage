@@ -261,7 +261,7 @@ echo.
 title Starting up...
 title
 :: Audio ::
-".\programs\avs2pipemod" -wav encode.avs | ".\programs\qaac64" -v 0 --he -q 2 --delay -5187s --threading --no-smart-padding - -o ".\temp\audio.mp4"
+".\programs\avs2pipemod" -wav encode.avs | ".\programs\qaac" -v 0 --he -q 2 --delay -5187s --threading --no-smart-padding - -o ".\temp\audio.mp4"
 echo.
 echo -------------------------------
 echo  Encoding Archive 512kb stream
@@ -309,7 +309,7 @@ title Starting up...
 title
 :: Extra 512kb ::
 :: Audio ::
-".\programs\avs2pipemod" -wav encode.avs | ".\programs\qaac64" -q 0.5 --delay -2112s --threading --no-smart-padding - -o ".\temp\audio_extra.mp4"
+".\programs\avs2pipemod" -wav encode.avs | ".\programs\qaac" -q 0.5 --delay -2112s --threading --no-smart-padding - -o ".\temp\audio_extra.mp4"
 echo.
 echo ---------------------------------------
 echo  Encoding ExtraHQ Archive 512kb stream
