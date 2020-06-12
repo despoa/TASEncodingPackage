@@ -192,7 +192,7 @@ width	= width  % 4 == 1 ? width  + 3 : \
 #		for hires 3D footage, upscaled with lanczos
 #	handheld and primary (dedupped): do nothing
 #	512kb: do ARC with lanczos
-g = hq && !hd \
+resized = hq && !hd \
 	? hq_hiResSrc \
 		? Lanczos4Resize(hq_baseWidth * hq_scale, hq_baseHeight * hq_scale) \
 		: handHeld || pass != 0 \
@@ -205,15 +205,15 @@ g = hq && !hd \
 			? last \
 			: Lanczos4Resize(width, height)
 
-#	If ms enabled, we use parameters of "g" to apply to all segments
-g = ms ? g.AppendSegment(ms_base, ms_start, ms_end, ms_format, resizer).ConvertToRGB32() : g
+#	If ms enabled, we use parameters of "resized" to apply to all segments
+resized = ms ? resized.AppendSegment(ms_base, ms_start, ms_end, ms_format, resizer).ConvertToRGB32() : resized
 
 #	Logo
-d = ImageSource(file=file, start=0, end=int((g.FrameRate * 2) - 1), fps=g.FrameRate) \
-	.ConvertToRGB32().AssumeFPS(g)
-e = BlankClip(d, audio_rate=g.AudioRate, channels=g.AudioChannels)
-f = AudioDub(d, e).Lanczos4Resize(g.width, g.height)
-last = hdvb ? f.PointResize(g.width / 2, g.height) : f ++ g
+logoVideo = ImageSource(file=file, start=0, end=int((resized.FrameRate * 2) - 1), fps=resized.FrameRate) \
+	.ConvertToRGB32().AssumeFPS(resized)
+logoAudio = BlankClip(logoVideo, audio_rate=resized.AudioRate, channels=resized.AudioChannels)
+logo = AudioDub(logoVideo, logoAudio).Lanczos4Resize(resized.width, resized.height)
+last = hdvb ? logo.PointResize(resized.width / 2, resized.height) : logo ++ resized
 
 #	Virtual Boy
 left  = hdvb ? last ++  left.PointResize(last.width, last.height) : 0
