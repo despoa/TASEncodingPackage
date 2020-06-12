@@ -78,9 +78,6 @@ subString4	= "For details, visit http://TASVideos.org/"
 # audio = WavSource("movie_000.wav")
 # AudioDub(audio, last)
 
-#	Lowres Gens
-# Crop(32,0,-32,0)
-
 #	Old Dolphin (remove /* and */ to uncomment)
 #	get values at http://tasvideos.org/forum/viewtopic.php?p=373299#373299
 /*
@@ -100,10 +97,6 @@ audio = \
 
 #	Fix progressing (not floating) desync
 # AssumeFPS(last.FrameCount / last.AudioLengthF * last.AudioRate)
-
-#	Deblink (not needed since youtuube went 60fps)
-# blend = false	# compensate for 30 fps flickering at all. check if the run requires it!
-# ngdb = true	# use smart deblink for that, otherwise will tasblend (avoid tasblend!)
 
 ######################
 # AUTOMATED SETTINGS #
@@ -128,9 +121,6 @@ LoadPlugin (root + "programs\mt_masktools-26.dll")
 LoadPlugin (root + "programs\autolevels_0.6_20110109.dll")
 LoadCPlugin(root + "programs\freesub.dll")
 LoadCPlugin(root + "programs\assrender.dll" )
-
-#	Deblink (uncomment corresponding variables above)
-# hd && blend ? ngdb ? ng_deblink(0.5) : TasBlend() : 0
 
 #	Make too dark scenes brighter
 # AutoLevels(filterRadius=1000, sceneChgThresh=200, gamma=1.1)
