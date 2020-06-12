@@ -31,6 +31,7 @@ subXoffs = 0		# subtitles horizontal offset (can be negative)
 subFont = "helv"	# see "fonts" folder for available types
 subFF2delay = 0		# extra delay in frames between subtitle entries 1 and 2
 subFF2delay2 = 0	# extra delay in frames between subtitle entries 2 and 3
+subFF2delay3 = 0	# extra delay in frames between subtitle entries 3 and 4
 bighaloCutoff = 384	# width and height above this will use bighalo instead of freesub
 
 #	Multisegment import (upscales hires segments straight to HD when needed)
@@ -262,6 +263,7 @@ subFontFile = "./fonts/" + subFontName + string(subSize) + ".bdf"
 subLength	= int(last.FrameRate * 5)
 subFF2		= SubFF  + subLength + 1 + subFF2delay
 subFF3		= SubFF2 + subLength + 1 + subFF2delay2
+subFF4		= SubFF3 + subLength + 1 + subFF2delay3
 subColor	= vb ? $009D9D9D : $00FFFFFF
 subRadius	= hd ? 0 : subHaloSize
 
@@ -308,7 +310,7 @@ subEntry == 3 || subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString2, \
 	text_color=subColor, halo_color=$00000000, lsp=2):0
 	
 subEntry == 3 ? useBighalo ? vb ? 0 : ng_bighalo(subString3 + "\n" + subString4,  \
-	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF, \
+	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF3, \
 	last_frame=subFF3+subLength, size=subSize, font_width=subWidth, \
 	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
 : FreeSub(subString3 + "\n" + subString4,  \
@@ -329,13 +331,13 @@ subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString3,  \
 
 
 subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString4,  \
-	x=subXpos, y=subYpos, align=subAlign, first_frame=subff2 + subLength*2 + 1, \
-	last_frame=subff2+subLength*3, size=subSize, font_width=subWidth, \
+	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF4, \
+	last_frame=subFF4+subLength, size=subSize, font_width=subWidth, \
 	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
 : FreeSub(subString4,  \
 	x=subXpos, y=subYpos+subHaloSize, \
 	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subff2 + subLength*2 + 1, last_frame=subff2+SubLength*3, \
+	align=subAlign, first_frame=subFF4, last_frame=subFF4+SubLength, \
 	text_color=subColor, halo_color=$00000000, lsp=2):0
 	
 #	Virtual Boy hacks
