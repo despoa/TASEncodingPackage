@@ -28,10 +28,11 @@ subAlign = 8		# subtitles horizontal alignment (7/8/9)
 subEntry = 2		# sets the number of sub entries (2/3/4)
 subYpos = 0			# subtitles vertical position
 subXoffs = 0		# subtitles horizontal offset (can be negative)
-subFont = "helv"	# see "fonts" folder for available types
+subLengthMul = 5	# entry length in seconds (fractions work)
 subFF2delay = 0		# extra delay in frames between subtitle entries 1 and 2
 subFF2delay2 = 0	# extra delay in frames between subtitle entries 2 and 3
 subFF2delay3 = 0	# extra delay in frames between subtitle entries 3 and 4
+subFont = "helv"	# see "fonts" folder for available types
 bighaloCutoff = 384	# width and height above this will use bighalo instead of freesub
 
 #	Multisegment import (upscales hires segments straight to HD when needed)
@@ -260,7 +261,7 @@ subHaloSize = useBighalo ? floor(subSize / 7) : floor(subSize / 4.5)
 subHaloSize = subHaloSize < 3 ? 3 : subHaloSize
 subFontName = subFont + (smallerSide < 224 ? "R" : "B")
 subFontFile = "./fonts/" + subFontName + string(subSize) + ".bdf"
-subLength	= int(last.FrameRate * 5)
+subLength	= int(last.FrameRate * subLengthMul)
 subFF2		= SubFF  + subLength + 1 + subFF2delay
 subFF3		= SubFF2 + subLength + 1 + subFF2delay2
 subFF4		= SubFF3 + subLength + 1 + subFF2delay3
