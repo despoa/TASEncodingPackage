@@ -5,7 +5,10 @@ SetFilterMTMode("DEFAULT_MT_MODE", MT_MULTI_INSTANCE)
 AddAutoloadDir("MAINSCRIPTDIR/programs/plugins")
 Import(ScriptDir() + "programs/functions.avsi")
 
-AviSource("movie.avi")
+#	"RGB24" for FFV1, "AUTO" for the rest
+pixelType = "RGB24"
+
+AviSource("movie.avi", pixel_type=pixelType)
 
 #	Dolphin (with FFMPEG). Use FFV1 patch for dumping:
 #	https://github.com/vadosnaprimer/dolphin/releases
@@ -201,7 +204,7 @@ resized = hq && !hd \
 			: Lanczos4Resize(width, height)
 
 #	If ms enabled, we use parameters of "resized" to apply to all segments
-resized = ms ? resized.AppendSegment(ms_base, ms_start, ms_end, ms_format, resizer).ConvertToRGB32() : resized
+resized = ms ? resized.AppendSegment(ms_base, ms_start, ms_end, ms_format, resizer, pixelType).ConvertToRGB32() : resized
 
 #	Logo
 logoVideo = ImageSource(file=file, start=0, end=int((resized.FrameRate * 2) - 1), fps=resized.FrameRate) \
