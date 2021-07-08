@@ -76,6 +76,9 @@ subString2	= "Playing time: " + time \
 subString3	= "This is a tool-assisted recording." \
 subString4	= "For details, visit http://TASVideos.org/"
 
+#	Fix progressing (not floating) audio/video desync
+avDesyncFixer = false
+
 ################
 # LEGACY STUFF #
 ################
@@ -107,9 +110,6 @@ audio = \
 	WavSource("dspdump.wav")
 */
 
-#	Fix progressing (not floating) desync
-# AssumeFPS(last.FrameCount / last.AudioLengthF * last.AudioRate)
-
 ######################
 # AUTOMATED SETTINGS #
 ######################
@@ -127,6 +127,13 @@ hdvb = hd && vb
 
 #	Make too dark scenes brighter
 # AutoLevels(filterRadius=1000, sceneChgThresh=200, gamma=1.1)
+
+#	Fix progressing (not floating) audio/video desync
+num = last.AudioLengthF * last.FrameRateNumerator
+denom = last.FrameCount * last.FrameRateDenominator
+avDesyncFixer ? AssumeSampleRate(Round(num / denom)).ResampleAudio(48000) : 0
+#	Alternative method that tweaks framerate instead (not recommended)
+# avDesyncFixer ? AssumeFPS(last.FrameCount / last.AudioLengthF * last.AudioRate) : 0
 
 #	VirtualBoy (bizhawk only!)
 #	http://tasvideos.org/forum/viewtopic.php?p=435440#435440
