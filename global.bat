@@ -1,5 +1,5 @@
 :: feos, 2013-2018
-:: Cheers to Guga, Velitha, nanogyth, Aktan, Dacicus, and TheCoreyBurton
+:: Cheers to Guga, Velitha, nanogyth, Aktan, Dacicus, TheCoreyBurton, and Zinfidel
 :: This global batch is a part of "TAS Encoding Package":
 :: http://tasvideos.org/EncodingGuide/PublicationManual.html
 :: Asks for aspect ratio to use
