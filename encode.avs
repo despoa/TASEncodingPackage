@@ -15,7 +15,7 @@ AviSource("movie.avi", pixel_type=pixelType)
 # AviSource("movie.avi", pixel_type="RGB24")
 # AudioDub(last, wavsource("dspdump.wav"))
 
-threads = 4			# manual, how many threads avisynth should use.
+threads = 8			# manual, how many threads avisynth should use.
 trimFrame = 654321	# manual, discards logo lengh automatically
 handHeld = false 	# auto, but set it for preview
 hd = false			# auto, but set it for preview
@@ -241,7 +241,7 @@ ConvertToYV24(chromaresample="point", matrix=(hd \
 
 #	YV12 reduces chroma, so we use "lanczos" even for HD
 #	http://tasvideos.org/forum/viewtopic.php?t=19426
-ConvertToYV16(chromaresample="lanczos", matrix=(hd \
+ConvertToYV12(chromaresample="lanczos", matrix=(hd \
 	? "Rec709" \
 	: "Rec601"))
 
