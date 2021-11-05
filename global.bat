@@ -141,16 +141,16 @@ echo ----------------------------
 echo.
 :: Audio ::
 echo Encoding audio...
-".\programs\ffmpeg" -y -hide_banner -v error -stats -i encode.avs -vn -c:a libvorbis -q 10 ".\temp\audio_youtube.ogg"
+".\programs\ffmpeg" -y -hide_banner -v error -stats -i encode.avs -vn -c:a libvorbis -q 10 ".\temp\audio.ogg"
 
 :: Video ::
 echo Encoding video...
 ".\programs\replacetext" "encode.avs" "hd = false" "hd = true"
-".\programs\x264_x64" --qp 5 -b 0 --keyint infinite --output ".\temp\video_youtube.mkv" encode.avs
+".\programs\x264_x64" --qp 5 -b 0 --keyint infinite --output ".\temp\video.mkv" encode.avs
 ".\programs\replacetext" "encode.avs" "hd = true" "hd = false"
 
 :: Muxing ::
-".\programs\mkvmerge" -o ".\output\encode_youtube.mkv" --compression -1:none ".\temp\video_youtube.mkv" ".\temp\audio_youtube.ogg"
+".\programs\mkvmerge" -o ".\output\encode__youtube.mkv" --compression -1:none ".\temp\video.mkv" ".\temp\audio.ogg"
 
 :: kept in case we have scripted uploading again
 :: echo.
@@ -176,11 +176,11 @@ echo Encoding audio...
 
 :: Video ::
 echo Encoding video...
-".\programs\x264_x64" --threads auto --crf 20 --keyint 600 --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me tesa --merange 64 --subme 11 --trellis 2 --partitions all --no-dct-decimate --range tv --input-range tv --colormatrix smpte170m -o ".\temp\video__480p.h264" encode.avs
+".\programs\x264_x64" --threads auto --crf 20 --keyint 600 --ref 16 --no-fast-pskip --bframes 16 --b-adapt 2 --direct auto --me tesa --merange 64 --subme 11 --trellis 2 --partitions all --no-dct-decimate --range tv --input-range tv --colormatrix smpte170m -o ".\temp\video.h264" encode.avs
 
 :: Muxing ::
 for /f "tokens=2 delims==" %%i in ('FINDSTR "r_frame_rate" "%~dp0temp\info.txt"') do (set fps=%%i)
-".\programs\mp4box_x64" -hint -add ".\temp\video__480p.h264":fps=%fps% -add ".\temp\audio.mp4" -new ".\output\encode__480p.mp4"
+".\programs\mp4box_x64" -hint -add ".\temp\video.h264":fps=%fps% -add ".\temp\audio.mp4" -new ".\output\encode__480p.mp4"
 goto Defaults
 
 : Defaults
