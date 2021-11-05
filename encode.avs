@@ -20,8 +20,7 @@ trimFrame = 654321	# manual, discards logo lengh automatically
 handHeld = false 	# auto, but set it for preview
 hd = false			# auto, but set it for preview
 halfFPS = false		# for games that "lag" every other frame
-stackNDS = false	# stack one of NDS screens near both of them for HD
-vb = false			# for Virtual Boy encodes
+prescaleFactor = 2	# set back to 1 if source is already 480p or 480i
 
 #	Resizer (for hd upscaling and multisegment import)
 resizer = hd ? "Point" : "Lanczos"
@@ -36,17 +35,16 @@ time = "00:00.0"
 rerecords = "0"
 
 #	Subtitles timing and placement
-subFF = 600			# first subtitles frame, set manually!
-subAlign = 8		# subtitles horizontal alignment (7/8/9)
-subEntry = 2		# sets the number of sub entries (2/3/4)
-subYpos = 0			# subtitles vertical position
-subXoffs = 0		# subtitles horizontal offset (can be negative)
+subFF = 4754 		# first subtitles frame, set manually!
+subAlign = 9		# subtitles horizontal alignment (7/8/9)
+subEntry = 3		# sets the number of sub entries (2/3/4)
+subYpc = 68			# subtitles vertical position in percents of video height
+subXpc = 1			# subtitles horizontal position in percents of video width (can be negative)
+subSizepc = 4.5		# subtitles font size in percents of smaller video side
 subLengthMul = 5	# entry length in seconds (fractions work)
 subFF2delay = 0		# extra delay in frames between subtitle entries 1 and 2
 subFF2delay2 = 0	# extra delay in frames between subtitle entries 2 and 3
 subFF2delay3 = 0	# extra delay in frames between subtitle entries 3 and 4
-subFont = "helv"	# see "fonts" folder for available types
-bighaloCutoff = 384	# width and height above this will use bighalo instead of freesub
 
 #	Multisegment import (upscales hires segments straight to HD when needed)
 #	requires normally importing a sample whose attributes it will use for all segments
@@ -56,13 +54,6 @@ ms_start = 0		# number of the first segment
 ms_end = 15			# number of the last segment
 ms_format = "%1.0f"	# string format: http://avisynth.nl/index.php/Internal_functions#String
 
-#	Extra HQ (upscaled downloadable encodes)
-hq = false			# auto
-hq_scale = 2		# manual for now
-hq_hiResSrc = false	# we downscale hires 3D source, and upscale lowres pixelated source
-hq_baseWidth = 320	# aspect-corrected 1x width (only for hires source)
-hq_baseHeight = 240	# aspect-corrected 1x height (only for hires source)
-
 #	Aspect ratio correction
 wAspect = 4
 hAspect = 3
@@ -71,9 +62,9 @@ hAspect = 3
 subString1	= game + "\n" \
 			+ (branch == "''" ? "" : branch + "\n") \
 			+ "Played by " + author
-subString2	= "Playing time: " + time \
+subString2	= "\nPlaying time: " + time \
 			+ "\nRerecord count: " + rerecords	
-subString3	= "This is a tool-assisted recording." \
+subString3	= "\nThis is a tool-assisted recording." \
 subString4	= "For details, visit http://TASVideos.org/"
 
 #	Fix progressing (not floating) audio/video desync
@@ -119,12 +110,6 @@ ConvertToRGB32()
 #	Add 1 scanline if height is uneven (ntsc sms, pal c64)
 last.height % 2 > 0 ? StackVertical(last, Crop(0, Height-1, 0, 0)) : 0
 
-pass = 0
-i444 = false
-originalWidth = last.width
-originalHeight = last.height
-hdvb = hd && vb
-
 #	Make too dark scenes brighter
 # AutoLevels(filterRadius=1000, sceneChgThresh=200, gamma=1.1)
 
@@ -135,38 +120,17 @@ avDesyncFixer ? AssumeSampleRate(Round(num / denom)).ResampleAudio(48000) : 0
 #	Alternative method that tweaks framerate instead (not recommended)
 # avDesyncFixer ? AssumeFPS(last.FrameCount / last.AudioLengthF * last.AudioRate) : 0
 
-#	VirtualBoy (bizhawk only!)
-#	http://tasvideos.org/forum/viewtopic.php?p=435440#435440
-left  = vb ? Crop(  0, 0, 384, 224).Levels(0, 1, 255, 0, 157) : 0
-right = vb ? Crop(384, 0, 384, 224).Levels(0, 1, 255, 0, 157) : 0
-vb ? hd ? 0 : Anaglyph(left, right, "grey").AudioDub(left) : 0
-
 #	Pick logo file
-file = hd || hq \
-	? vb \
-		? "logoGrey.png" \
-		: stackNDS \
-			? "logohdnds.png" \
-			: last.height == 384 \
-				? "logonds.png" \
-				: "hdlogo.png" \
-	: last.height == 384 \
-		? "logonds.png" \
-		: "logo.png"
+file = hd \
+	? "hdlogo.png" \
+	: "logo.png"
 # file = !hd ? "logo34.png" : "hdlogo34.png"
 
-#	Stack 3 NDS screens
-upperScreen = last.Crop(0, 0, -0, last.height/2)
-lowerScreen = last.Crop(0, last.height/2, -0, -0)
-halfScreen = upperScreen	# set which NDS screen to put as main
-stackNDS && hd ? StackHorizontal(halfScreen.PointResize(last.width*2, last.height), last) : 0
+prescaleFactor > 1 ? \
+	PointResize(last.width * prescaleFactor, last.height * prescaleFactor) : 0
 
 #	Aspect ratio correction for SD encodes
-height	= handHeld \
-		? last.height \
-		: last.width > last.height * wAspect / hAspect \
-		? last.width * hAspect / wAspect \
-		: last.height
+height	= last.height
 width	= handHeld \
 		? last.width \
 		: height * wAspect / hAspect
@@ -187,26 +151,15 @@ width	= handHeld \
 width	= width  % 4 == 1 ? width  + 3 : \
 		  width  % 4 == 2 ? width  + 2 : \
 		  width  % 4 == 3 ? width  + 1 : width
+hStretch = height / last.height
 
 #	Rescaling
-#	extra HQ:
-#		hires source: downscale straight to aspect-corrected res with lanczos
-#		lowres source: upscalse by our factor with point, then do ARC with lanczos for 512kb
-#	hd:
-#		resize to 4K, then just subsample with lanczos in the end
-#		for hires 3D footage, upscaled with lanczos
-#	handheld and primary (dedupped): do nothing
-#	512kb: do ARC with lanczos
-resized = hq && !hd \
-	? hq_hiResSrc \
-		? Lanczos4Resize(hq_baseWidth * hq_scale, hq_baseHeight * hq_scale) \
-		: handHeld || pass != 0 \
-			? PointResize(last.width * hq_scale, last.height * hq_scale) \
-			: PointResize(last.width * hq_scale, last.height * hq_scale) \
-				.Lanczos4Resize(width * hq_scale, height * hq_scale) \
-	: hd \
+#	hd: resize to 4K, then just subsample with lanczos in the end
+#	handheld: do nothing
+#	480p: do ARC with lanczos
+resized = hd \
 		? eval(resizer+"Resize(width, height)") \
-		: handHeld || pass != 0 \
+		: handHeld \
 			? last \
 			: Lanczos4Resize(width, height)
 
@@ -218,159 +171,63 @@ logoVideo = ImageSource(file=file, start=0, end=int((resized.FrameRate * 2) - 1)
 	.ConvertToRGB32().AssumeFPS(resized)
 logoAudio = BlankClip(logoVideo, audio_rate=resized.AudioRate, channels=resized.AudioChannels)
 logo = AudioDub(logoVideo, logoAudio).Lanczos4Resize(resized.width, resized.height)
-last = hdvb ? logo.PointResize(resized.width / 2, resized.height) : logo ++ resized
-
-#	Virtual Boy
-left  = hdvb ? last ++  left.PointResize(last.width, last.height) : 0
-right = hdvb ? last ++ right.PointResize(last.width, last.height) : 0
-
-#	Additional subtitle magic
-#	figure out how much our font will be changed after x264 ARC and for HD
-wFactor  	= hd || hq ? float(last.width)  / wARC : 1
-hFactor		= hd || hq ? float(last.height) / hARC : 1
-wStretch	= (handHeld || pass == 0) && !hdvb ? 1 \
-			: (float(last.width) / last.height) / (float(wAspect) / hAspect)
-smallerSide = last.height < last.width ? last.height : last.width
-biggerSide  = last.height > last.width ? last.height : last.width
-
-#	use bighalo if we're relatively hires
-#	or if font stretch on some side is too heavy (ARCed primary)
-useBighalo  = biggerSide > bighaloCutoff \
-			|| ((wStretch < 0.8 || wStretch > 1.3) \
-			&& !handHeld && pass != 0 \
-			&& smallerSide >= 224)
+last = logo ++ resized
 
 #	Subtitles variables
-subXoffs	= int(subXoffs * wStretch)
-subRatio	= float(last.height) / 21
-#subRatio	= float(smallerSide) / 21
+subXpos		= float(last.width) / 100 * subXpc
 subXpos 	= subAlign == 7 || subAlign == 4 || subAlign == 1 \
-			? (2 + subXoffs) * wFactor \
+			? 4 + subXpos \
 			: subAlign == 8 || subAlign == 5 || subAlign == 2 \
-			? last.width / 2 + subXoffs * wFactor \
-			: last.width - (2 + subXoffs) * wFactor
-subXpos 	= hdvb ? subXpos / 2 : subXpos
-subYpos		= int(float(subYpos) / (wStretch > 1 ? wStretch : 1) * hFactor)
-subYpos		= hdvb ? subYpos * hFactor : subYpos
-subSize 	= useBighalo ? subRatio \
-			: subRatio < 10 ?  8 \
-			: subRatio < 12 ? 10 \
-			: subRatio < 14 ? 12 \
-			: subRatio < 18 ? 14 \
-			: subRatio < 24 ? 18 : 24
-subWidth	= useBighalo && !hd ? float(subSize) / 2.323 * wStretch : 0
-subHaloSize = useBighalo ? floor(subSize / 7) : floor(subSize / 4.5)
-subHaloSize = subHaloSize < 3 ? 3 : subHaloSize
-subFontName = subFont + (smallerSide < 224 ? "R" : "B")
-subFontFile = "./fonts/" + subFontName + string(subSize) + ".bdf"
+			? last.width / 4 + subXpos \
+			: last.width - (4 + subXpos)
+subYpos		= float(last.height) / 100 * subYpc
+smallerSide = last.height < last.width ? last.height : last.width
+subSize 	= float(smallerSide) / 100 * subSizepc
+subHaloSize = floor(subSize / 7)
 subLength	= int(last.FrameRate * subLengthMul)
 subFF2		= SubFF  + subLength + 1 + subFF2delay
 subFF3		= SubFF2 + subLength + 1 + subFF2delay2
 subFF4		= SubFF3 + subLength + 1 + subFF2delay3
-subColor	= vb ? $009D9D9D : $00FFFFFF
+subColor	= $00FFFFFF
 subRadius	= hd ? 0 : subHaloSize
 
 #	Subtitles functions
-
-subEntry == 2 ? useBighalo ? vb ? 0 : ng_bighalo(subString1 + "\n" + SubString2, \
+subEntry == 2 ? ng_bighalo(subString1 + "\n" + SubString2, \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF, \
-	last_frame=subFF+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString1 + "\n" + SubString2, x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subFF, last_frame=subFF+subLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
+	last_frame=subFF+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 	
-	
-subEntry == 2 ? useBighalo ? vb ? 0 : ng_bighalo(subString3 + "\n" + subString4, \
+subEntry == 2 ? ng_bighalo(subString3 + "\n" + subString4, \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subff2, \
-	last_frame=subff2+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString3 + "\n" + subString4, \
-	x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subff2, last_frame=subff2+SubLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2) : 0
+	last_frame=subff2+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 	
-	
-subEntry == 3 || subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString1, \
+subEntry == 3 || subEntry == 4 ? ng_bighalo(subString1, \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF, \
-	last_frame=subFF+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString1, x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subFF, last_frame=subFF+subLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
+	last_frame=subFF+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 	
-subEntry == 3 || subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString2, \
+subEntry == 3 || subEntry == 4 ? ng_bighalo(subString2, \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subff2, \
-	last_frame=subff2+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString2, \
-	x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subff2, last_frame=subff2+SubLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
+	last_frame=subff2+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 	
-subEntry == 3 ? useBighalo ? vb ? 0 : ng_bighalo(subString3 + "\n" + subString4,  \
+subEntry == 3 ? ng_bighalo(subString3 + "\n" + subString4,  \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF3, \
-	last_frame=subFF3+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString3 + "\n" + subString4,  \
-	x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subFF3, last_frame=subFF3+SubLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
+	last_frame=subFF3+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 	
-subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString3,  \
+subEntry == 4 ? ng_bighalo(subString3,  \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF3, \
-	last_frame=subFF3+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString3,  \
-	x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subFF3, last_frame=subFF3+SubLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
+	last_frame=subFF3+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 
-
-subEntry == 4 ? useBighalo ? vb ? 0 : ng_bighalo(subString4,  \
+subEntry == 4 ? ng_bighalo(subString4,  \
 	x=subXpos, y=subYpos, align=subAlign, first_frame=subFF4, \
-	last_frame=subFF4+subLength, size=subSize, font_width=subWidth, \
-	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) \
-: FreeSub(subString4,  \
-	x=subXpos, y=subYpos+subHaloSize, \
-	font=subFontFile, halo_width=subHaloSize, halo_height=subHaloSize, \
-	align=subAlign, first_frame=subFF4, last_frame=subFF4+SubLength, \
-	text_color=subColor, halo_color=$00000000, lsp=2):0
-	
-#	Virtual Boy hacks
-left = hdvb ? left \
-	.ng_bighalo(subString1, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF, last_frame=subFF+subLength, \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) \
-	.ng_bighalo(subString2, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF2, last_frame=subFF2+subLength, \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) \
-	.ng_bighalo(subString3 + "\n" + subString4, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF3, last_frame=(subFF3+SubLength), \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) : 0
-
-right = hdvb ? right \
-	.ng_bighalo(subString1, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF, last_frame=subFF+subLength, \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) \
-	.ng_bighalo(subString2, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF2, last_frame=subFF2+subLength, \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) \
-	.ng_bighalo(subString3 + "\n" + subString4, x=subXpos, y=subYpos, \
-		align=subAlign, first_frame=subFF3, last_frame=subFF3+SubLength, \
-		size=subSize, text_color=subColor, halo_color=$00000000, lsp=2) : 0
-
-hdvb ? yt3d(left, right).AudioDub(left) : 0
+	last_frame=subFF4+subLength, size=subSize, \
+	text_color=subColor, halo_color=$00000000, lsp=2, halo_radius=subRadius) : 0
 
 Trim(0, trimFrame)
-
-# pass == 1 ? assrender("subtitles.ass") : 0
 
 #	Youtube can't hanble fps above 60
 hd && last.FrameRate > 60 ? ChangeFPS(60) : 0
@@ -380,20 +237,12 @@ halfFPS ? SelectOdd : 0
 #	YV24 conversion doesn't reduce chroma, so "point" is fine
 ConvertToYV24(chromaresample="point", matrix=(hd \
 	? "Rec709" \
-	: (pass == 0 \
-		? "Rec601" \
-		: "PC.601")))
-
-#	Remove duplicate frames for primary
-pass == 1 ? ExactDedup(firstpass=true, dupinfo="./temp/dup.txt",times="./temp/times.txt") : 0
-pass == 2 ? ExactDedup(firstpass=false,dupinfo="./temp/dup.txt"                         ) : 0
+	: "Rec601"))
 
 #	YV12 reduces chroma, so we use "lanczos" even for HD
 #	http://tasvideos.org/forum/viewtopic.php?t=19426
-i444 ? last : ConvertToYV12(chromaresample="lanczos", matrix=(hd \
+ConvertToYV16(chromaresample="lanczos", matrix=(hd \
 	? "Rec709" \
-	: (pass == 0 \
-		? "Rec601" \
-		: "PC.601")))
+	: "Rec601"))
 
-pass != 1 ? Prefetch(threads) : last
+Prefetch(threads)
