@@ -124,8 +124,8 @@ set /p EncodeChoice=
 
 : process_encode_option
 if "%EncodeChoice%"=="1" goto SD
+if "%EncodeChoice%"=="2" goto HD
 if "%EncodeChoice%"=="3" goto HD
-if "%EncodeChoice%"=="4" goto HD
 
 echo.
 echo You better choose something real!
