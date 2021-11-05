@@ -117,7 +117,7 @@ echo.
 echo What encode do you want to do?
 echo.
 echo Press 1 for Standard Definition MP4.
-echo Press 3 for High Definition MKV.
+echo Press 2 for High Definition MKV.
 echo Press 3 for Both.
 echo.
 set /p EncodeChoice=
