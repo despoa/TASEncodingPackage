@@ -35,12 +35,12 @@ time = "00:00.0"
 rerecords = "0"
 
 #	Subtitles timing and placement
-subFF = 4754 		# first subtitles frame, set manually!
-subAlign = 9		# subtitles horizontal alignment (7/8/9)
+subFF = 2689 		# first subtitles frame, set manually!
+subAlign = 8		# subtitles horizontal alignment (7/8/9)
 subEntry = 3		# sets the number of sub entries (2/3/4)
-subYpc = 68			# subtitles vertical position in percents of video height
+subYpc = 1			# subtitles vertical position in percents of video height
 subXpc = 1			# subtitles horizontal position in percents of video width (can be negative)
-subSizepc = 4.5		# subtitles font size in percents of smaller video side
+subSizepc = 5		# subtitles font size in percents of smaller video side
 subLengthMul = 5	# entry length in seconds (fractions work)
 subFF2delay = 0		# extra delay in frames between subtitle entries 1 and 2
 subFF2delay2 = 0	# extra delay in frames between subtitle entries 2 and 3
@@ -62,9 +62,9 @@ hAspect = 3
 subString1	= game + "\n" \
 			+ (branch == "''" ? "" : branch + "\n") \
 			+ "Played by " + author
-subString2	= "\nPlaying time: " + time \
+subString2	= "Playing time: " + time \
 			+ "\nRerecord count: " + rerecords	
-subString3	= "\nThis is a tool-assisted recording." \
+subString3	= "This is a tool-assisted recording." \
 subString4	= "For details, visit http://TASVideos.org/"
 
 #	Fix progressing (not floating) audio/video desync
@@ -178,7 +178,7 @@ subXpos		= float(last.width) / 100 * subXpc
 subXpos 	= subAlign == 7 || subAlign == 4 || subAlign == 1 \
 			? 4 + subXpos \
 			: subAlign == 8 || subAlign == 5 || subAlign == 2 \
-			? last.width / 4 + subXpos \
+			? last.width / 2 + subXpos \
 			: last.width - (4 + subXpos)
 subYpos		= float(last.height) / 100 * subYpc
 smallerSide = last.height < last.width ? last.height : last.width
@@ -241,7 +241,7 @@ ConvertToYV24(chromaresample="point", matrix=(hd \
 
 #	YV12 reduces chroma, so we use "lanczos" even for HD
 #	http://tasvideos.org/forum/viewtopic.php?t=19426
-ConvertToYV12(chromaresample="lanczos", matrix=(hd \
+ConvertToYV12(chromaresample="point", matrix=(hd \
 	? "Rec709" \
 	: "Rec601"))
 
