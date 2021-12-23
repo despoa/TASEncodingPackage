@@ -176,10 +176,10 @@ last = logo ++ resized
 #	Subtitles variables
 subXpos		= float(last.width) / 100 * subXpc
 subXpos 	= subAlign == 7 || subAlign == 4 || subAlign == 1 \
-			? 4 + subXpos \
+			? subXpos \
 			: subAlign == 8 || subAlign == 5 || subAlign == 2 \
 			? last.width / 2 + subXpos \
-			: last.width - (4 + subXpos)
+			: last.width - subXpos
 subYpos		= float(last.height) / 100 * subYpc
 smallerSide = last.height < last.width ? last.height : last.width
 subSize 	= float(smallerSide) / 100 * subSizepc
