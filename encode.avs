@@ -2,7 +2,6 @@
 #	http://tasvideos.org/EncodingGuide/PublicationManual.html
 
 SetFilterMTMode("DEFAULT_MT_MODE", MT_MULTI_INSTANCE)
-#AddAutoloadDir("MAINSCRIPTDIR/programs/plugins")
 Import(ScriptDir() + "programs/functions.avsi")
 
 threads = 8
