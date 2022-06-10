@@ -43,8 +43,8 @@ subXpc = 1			# subtitles horizontal position in percents of video width (can be 
 subSizepc = 5		# subtitles font size in percents of smaller video side
 subLengthMul = 5	# entry length in seconds (fractions work)
 subFF2delay = 0		# extra delay in frames between subtitle entries 1 and 2
-subFF2delay2 = 0	# extra delay in frames between subtitle entries 2 and 3
-subFF2delay3 = 0	# extra delay in frames between subtitle entries 3 and 4
+subFF3delay = 0		# extra delay in frames between subtitle entries 2 and 3
+subFF4delay = 0		# extra delay in frames between subtitle entries 3 and 4
 
 #	Multisegment import (upscales hires segments straight to HD when needed)
 #	requires normally importing a sample whose attributes it will use for all segments
@@ -188,9 +188,9 @@ smallerSide = last.height < last.width ? last.height : last.width
 subSize 	= float(smallerSide) / 100 * subSizepc
 subHaloSize = floor(subSize / 7)
 subLength	= int(last.FrameRate * subLengthMul)
-subFF2		= SubFF  + subLength + 1 + subFF2delay
-subFF3		= SubFF2 + subLength + 1 + subFF2delay2
-subFF4		= SubFF3 + subLength + 1 + subFF2delay3
+subFF2		= subFF  + subLength + 1 + subFF2delay
+subFF3		= subFF2 + subLength + 1 + subFF3delay
+subFF4		= subFF3 + subLength + 1 + subFF4delay
 subColor	= $00FFFFFF
 subRadius	= hd ? 0 : subHaloSize
 
