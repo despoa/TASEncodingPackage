@@ -29,7 +29,7 @@ resizer = hd ? "Point" : "Lanczos"
 
 #	Subtitles contents
 game = "Game Name"
-branch = "'branch'"	# lowercase for usual words, capital for in-game capital words. when blank, leave "''"
+branch = "branch"	# lowercase for usual words, capital for in-game capital words. when blank, leave ""
 author = "author"
 time = "00:00.0"
 rerecords = "0"
@@ -62,7 +62,7 @@ hAspect = 3
 
 #	Subtitles text
 subString1	= game + "\n" \
-			+ (branch == "''" ? "" : branch + "\n") \
+			+ (branch == "" ? "" : """"""" + branch + """"\n""") \
 			+ "Played by " + author
 subString2	= "Playing time: " + time \
 			+ "\nRerecord count: " + rerecords	
