@@ -9,32 +9,24 @@ function AppendSegment(
 \	bool hd,
 \ string pix_type
 \){
-	filename = base + string(first_val, format) + ".avi"
-	result = AviSource(filename, pixel_type=pix_type)
-	
-	if (hd) {
-		result = result.Eval(resizer + """Resize(sample.width, sample.height)""")
-	} else {
-		scaler = float(sample.height) / float(result.height)
-		temp_width = float(result.width) * scaler
-		result = result.PointResize(int(temp_width), sample.height)
-		result = result.Lanczos4Resize(sample.width, sample.height)
-	}
-	
-	for (i = first_val + 1, last_val) {
+	for (i = first_val, last_val) {
 		filename = base + string(i, format) + ".avi"
-		next_clip = AviSource(filename, pixel_type=pix_type)
+		AviSource(filename, pixel_type=pix_type)
 		
 		if (hd) {
-			next_clip = next_clip.Eval(resizer + """Resize(sample.width, sample.height)""")
+			Eval(resizer + """Resize(sample.width, sample.height)""")
 		} else {
-			scaler = float(sample.height) / float(next_clip.height)
-			temp_width = float(next_clip.width) * scaler
-			next_clip = next_clip.PointResize(int(temp_width), sample.height)
-			next_clip = next_clip.Lanczos4Resize(sample.width, sample.height)
+			scaler = float(sample.height) / float(last.height)
+			temp_width = float(last.width) * scaler
+			PointResize(int(temp_width), sample.height)
+			Lanczos4Resize(sample.width, sample.height)
 		}
 		
-		result = result + next_clip
+		if (i == first_val) {
+			result = last
+		} else {
+			result = result + last
+		}
 	}
 	
 	return result

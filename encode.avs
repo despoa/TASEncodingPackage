@@ -188,7 +188,9 @@ resized = hd || ARCorrection \
 
 #	If ms enabled, we use parameters of "resized" to apply to all segments
 if (ms) {
-	resized = resized.AppendSegment(msBase, msStart, msEnd, msFormat, resizer, hd, pixelType).ConvertToRGB32()
+	resized = resized \
+		.AppendSegment(msBase, msStart, msEnd, msFormat, resizer, hd, pixelType) \
+		.ConvertToRGB32()
 	
 	if (msAudio) {
 		resized = AudioDub(resized, WavSource(msAudiotrack))
