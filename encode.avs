@@ -156,35 +156,40 @@ if (prescaleFactor > 1 && !hd) {
 #	Aspect ratio correction for SD encodes
 #	if dimensions are not multiples of 4, codecs freak out, so we enforce mod 4
 mod		= 4
-hdHeight= 2160
 height	= last.height.ForceModulo(mod, true)
 width	= (ARCorrection \
 		? height * wAspect / hAspect \
 		: last.width) \
 		.ForceModulo(mod, true)
 
-#	Remember SD frame size for subYpos HD tweaks
-wARC	= width
-hARC	= height
-
 #	Actually go HD if we need
 if (hd) {
-	height = hdHeight
-}
-
-width	= (ARCorrection \
-		? height * wAspect / hAspect \
-		: height * last.width / last.height) \
-		.ForceModulo(mod, true)
-hStretch= height / last.height
-
-# YouTube has a 4K width limit of 3840
-if (hd && (width > 3840)) {
-	width = 3840
-	height = (ARCorrection \
-		? width * hAspect / wAspect \
-		: width * last.height / last.width) \
-		.ForceModulo(mod, true)
+	vertical        = width < height
+	
+	normalAspect	= ARCorrection ? float(wAspect) / hAspect \
+		: float(last.width) / last.height
+	reverseAspect	= ARCorrection ? float(hAspect) / wAspect \
+		: float(last.height) / last.width
+	
+	if (vertical) {
+		temp		= normalAspect
+		normalAspect	= reverseAspect
+		reverseAspect	= temp
+	}
+	
+	smallerSideCap  = 2160
+	biggerSideCap   = 3840
+	
+	smallerSideHD	= smallerSideCap
+	biggerSideHD	= int(smallerSideHD * normalAspect).ForceModulo(mod, true)
+	
+	if (biggerSideHD > biggerSideCap) {
+		biggerSideHD	= biggerSideCap
+		smallerSideHD	= int(biggerSideHD * reverseAspect).ForceModulo(mod, true)
+	}
+	
+	width	= vertical ? smallerSideHD : biggerSideHD
+	height	= vertical ? biggerSideHD  : smallerSideHD
 }
 
 #	Rescaling
