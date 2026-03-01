@@ -185,7 +185,7 @@ if (hd) {
 	
 	# Preliminary step to prevent encode from being turned into a YouTube short.
 	# Height will be set to 2160 and be the "bigger" side for vertical encodes.
-	if (vertical && last.FrameCount <= last.FrameRate * 178) {
+	if (vertical && trimFrame <= last.FrameRate * 180) {
 		biggerSideHD	= int(smallerSideHD * reverseAspect).ForceModulo(mod, true)
 		vertical = false
 	}
@@ -214,7 +214,7 @@ if (ms && !msLetterbox) {
 }
 
 #	Apply borders if encode meets YouTube short qualifications.
-if (hd && width <= height && resized.FrameCount <= resized.FrameRate * 178) {
+if (hd && width <= height && trimFrame <= resized.FrameRate * 180) {
 	border = (height - width) / 2 + 8
 	resized = resized.AddBorders(border, 0, border, 0)
 }
